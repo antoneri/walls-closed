@@ -29,14 +29,10 @@ def stripped_lines(html):
 
 def datetime_obj(year, month, day, time):
     format_str = "{} {} {} {}".format(year, month, day, time)
-    return datetime.strptime(format_str, "%Y %m %d %H:%M")
-
-
-class Data(dict):
-    def append(self, year, month, day, start, stop, text):
-        entry = {int(day): {'start': start, 'stop': stop, 'text': text}}
-        self[year].setdefault(month, {}).update(entry)
-        return self
+    try:
+        return datetime.strptime(format_str, "%Y %m %d %H:%M")
+    except ValueError as e:
+        raise
 
 
 def month_num(month):
@@ -44,6 +40,13 @@ def month_num(month):
               'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
     order = {val: key+1 for key, val in enumerate(months)}
     return order[month]
+
+
+class Data(dict):
+    def append(self, year, month, day, start, stop, text):
+        entry = {int(day): {'start': start, 'stop': stop, 'text': text}}
+        self[year].setdefault(month, {}).update(entry)
+        return self
 
 
 def parse(html):
@@ -72,8 +75,8 @@ def parse(html):
         if match and curr_year is not None and curr_year in data:
             day = match.group('day')
             month = month_num(match.group('month'))
-            start = datetime_obj(curr_year, month, day, match.group('start'))
-            stop = datetime_obj(curr_year, month, day, match.group('stop'))
+            start = datetime_obj(curr_year, month, day, match.group('start')).timestamp()
+            stop = datetime_obj(curr_year, month, day, match.group('stop')).timestamp()
             data.append(curr_year, month, day, start, stop, match.group('text'))
 
     return data
