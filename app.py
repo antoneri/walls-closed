@@ -21,8 +21,8 @@ def stripped_lines(html):
 
 
 def timestamp(year, month, day, time):
-    format_str = "{} {} {} {}".format(year, month, day, time)
-    return datetime.strptime(format_str, "%Y %m %d %H:%M").timestamp()
+    date = " ".join(map(str, [year, month, day, time]))
+    return datetime.strptime(date, "%Y %m %d %H:%M").timestamp()
 
 
 def month_num(month):
