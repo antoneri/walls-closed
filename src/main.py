@@ -2,7 +2,7 @@
 import re
 import json
 from datetime import datetime
-from urllib import request
+from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 
 #from icalendar import Calendar, Event
@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 def get_html(url):
     # TODO cache
     try:
-        res = request.urlopen(URL)
+        res = urlopen(URL)
     except URLError as e:
         raise
 
