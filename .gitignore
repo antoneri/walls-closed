@@ -67,3 +67,6 @@ target/
 [Ss]cripts
 pyvenv.cfg
 
+
+### Application data ###
+data.json
