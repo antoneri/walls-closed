@@ -38,6 +38,7 @@ def month_num(month):
     try:
         return order[month]
     except KeyError as e:
+        print("Regex parser broke?")
         raise
 
 
