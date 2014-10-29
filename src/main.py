@@ -39,7 +39,7 @@ def timestamp(year, month, day, time):
 def month_num(month):
     months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun',
               'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
-    order = {val: key+1 for key, val in enumerate(months)}
+    order = {val: key for key, val in enumerate(months, start=1)}
     return order[month]
 
 
