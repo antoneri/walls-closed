@@ -81,10 +81,10 @@ def to_ical(data):
         for m, monthdata in yeardata.items():
             for d, eventdata in monthdata.items():
                 event = Event()
+                event.add('summary', eventdata['text'])
                 event.add('dtstamp', eventdata['start'])
                 event.add('dtstart', eventdata['start'])
                 event.add('dtend', eventdata['stop'])
-                event.add('summary', eventdata['text'])
                 cal.add_component(event)
 
     return cal.to_ical()
