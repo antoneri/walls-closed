@@ -3,11 +3,7 @@ import re
 import json
 from datetime import datetime
 from urllib import request
-
-try:
-    from bs4 import BeautifulSoup, SoupStrainer
-except ImportError as e:
-    raise
+from bs4 import BeautifulSoup, SoupStrainer
 
 #from icalendar import Calendar, Event
 
