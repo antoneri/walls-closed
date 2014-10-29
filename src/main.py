@@ -40,7 +40,10 @@ def month_num(month):
     months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun',
               'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
     order = {val: key for key, val in enumerate(months, start=1)}
-    return order[month]
+    try:
+        return order[month]
+    except KeyError as e:
+        raise
 
 
 class Data(dict):
