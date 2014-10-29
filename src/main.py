@@ -3,7 +3,6 @@ import re
 import json
 from datetime import datetime
 from urllib import request
-from urllib.error import URLError
 
 try:
     from bs4 import BeautifulSoup, SoupStrainer
