@@ -44,7 +44,12 @@ def month_num(month):
 
 class Data(dict):
     def append(self, year, month, day, start, stop, text):
-        entry = {int(day): {'start': start, 'stop': stop, 'text': text}}
+        try:
+            day = int(day)
+        except ValueError as e:
+            raise
+
+        entry = {day: {'start': start, 'stop': stop, 'text': text}}
         self[year].setdefault(month, {}).update(entry)
         return self
 
