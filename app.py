@@ -7,6 +7,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 from icalendar import Calendar, Event
 
+
 def get_html(url):
     # TODO cache
     res = urlopen(URL)
@@ -91,28 +92,21 @@ def to_ical(data):
 
 if __name__ == "__main__":
     URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
-    SLEEP_MINS = 60
     OUTPUT = "walls-closed.ics"
 
-    while (True):
-        try:
-            try:
-                print("Fetching data...")
-                html = get_html(URL)
-                print("Parsing html...")
-                data = parse(html)
+    try:
+        print("Fetching data...")
+        html = get_html(URL)
+        print("Parsing html...")
+        data = parse(html)
 
-                if data:
-                    print("Generating ICS...")
-                    with open(OUTPUT, "wb") as outfile:
-                        outfile.write(to_ical(data))
-                else:
-                    raise Exception("Error: could not parse data.")
+        if data:
+            print("Generating ICS...")
+            with open(OUTPUT, "wb") as outfile:
+                outfile.write(to_ical(data))
+        else:
+            raise Exception("Error: could not parse data.")
 
-            except Exception as e:
-                print("Error: {}".format(e))
+    except Exception as e:
+        print("Error: {}".format(e))
 
-            print("Sleeping for {} minutes.".format(SLEEP_MINS))
-            time.sleep(60*SLEEP_MINS)
-        except KeyboardInterrupt:
-            sys.exit("Quiting...")
