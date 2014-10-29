@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import re
+import sys
+import time
 from datetime import datetime
 from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
@@ -7,11 +9,7 @@ from icalendar import Calendar, Event
 
 def get_html(url):
     # TODO cache
-    try:
-        res = urlopen(URL)
-    except URLError as e:
-        raise
-
+    res = urlopen(URL)
     return res.read()
 
 
@@ -23,21 +21,14 @@ def stripped_lines(html):
 
 def timestamp(year, month, day, time):
     format_str = "{} {} {} {}".format(year, month, day, time)
-    try:
-        return datetime.strptime(format_str, "%Y %m %d %H:%M").timestamp()
-    except (ValueError, OverflowError) as e:
-        raise
+    return datetime.strptime(format_str, "%Y %m %d %H:%M").timestamp()
 
 
 def month_num(month):
     months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun',
               'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
     order = {val: key for key, val in enumerate(months, start=1)}
-    try:
-        return order[month]
-    except KeyError as e:
-        print("Regex parser broke?")
-        raise
+    return order[month]
 
 
 class Data(dict):
@@ -100,11 +91,28 @@ def to_ical(data):
 
 if __name__ == "__main__":
     URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
-    html = get_html(URL)
-    data = parse(html)
+    SLEEP_MINS = 60
+    OUTPUT = "walls-closed.ics"
 
-    if not data:
-        raise StandardError("Page source changed?")
+    while (True):
+        try:
+            try:
+                print("Fetching data...")
+                html = get_html(URL)
+                print("Parsing html...")
+                data = parse(html)
 
-    with open("walls-closed.ics", "wb") as outfile:
-        outfile.write(to_ical(data))
+                if data:
+                    print("Generating ICS...")
+                    with open(OUTPUT, "wb") as outfile:
+                        outfile.write(to_ical(data))
+                else:
+                    raise Exception("Error: could not parse data.")
+
+            except Exception as e:
+                print("Error: {}".format(e))
+
+            print("Sleeping for {} minutes.".format(SLEEP_MINS))
+            time.sleep(60*SLEEP_MINS)
+        except KeyboardInterrupt:
+            sys.exit("Quiting...")
