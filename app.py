@@ -22,7 +22,7 @@ def stripped_lines(html):
 
 def timestamp(year, month, day, time):
     date = " ".join(map(str, [year, month, day, time]))
-    return datetime.strptime(date, "%Y %m %d %H:%M").timestamp()
+    return datetime.strptime(date, "%Y %m %d %H:%M")
 
 
 def month_num(month):
@@ -81,9 +81,9 @@ def to_ical(data):
         for m, monthdata in yeardata.items():
             for d, eventdata in monthdata.items():
                 event = Event()
-                event.add('dtstamp', datetime.fromtimestamp(eventdata['start']))
-                event.add('dtstart', datetime.fromtimestamp(eventdata['start']))
-                event.add('dtend', datetime.fromtimestamp(eventdata['stop']))
+                event.add('dtstamp', eventdata['start'])
+                event.add('dtstart', eventdata['start'])
+                event.add('dtend', eventdata['stop'])
                 event.add('summary', eventdata['text'])
                 cal.add_component(event)
 
