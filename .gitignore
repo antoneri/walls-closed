@@ -69,4 +69,4 @@ pyvenv.cfg
 
 
 ### Application data ###
-data.json
+*.ics
