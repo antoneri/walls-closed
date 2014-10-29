@@ -108,5 +108,5 @@ if __name__ == "__main__":
             raise Exception("could not parse data")
 
     except Exception as e:
-        print("Error: {}".format(e))
+        sys.exit("Error: {}".format(e))
 
