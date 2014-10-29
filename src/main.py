@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+import json
 from datetime import datetime
 from urllib import request
 from urllib.error import URLError
@@ -44,11 +45,6 @@ def month_num(month):
 
 class Data(dict):
     def append(self, year, month, day, start, stop, text):
-        try:
-            day = int(day)
-        except ValueError as e:
-            raise
-
         entry = {day: {'start': start, 'stop': stop, 'text': text}}
         self[year].setdefault(month, {}).update(entry)
         return self
@@ -96,11 +92,12 @@ if __name__ == "__main__":
     URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
     html = get_html(URL)
     data = parse(html)
+    js = json.dumps(data, ensure_ascii=False)
 
     if not data:
         raise StandardError("Page source changed?")
 
     import pprint
     pp = pprint.PrettyPrinter(indent=4, width=100)
-    pp.pprint(data)
+    pp.pprint(json.loads(js))
 
