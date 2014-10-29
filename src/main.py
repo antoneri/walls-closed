@@ -92,12 +92,17 @@ if __name__ == "__main__":
     URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
     html = get_html(URL)
     data = parse(html)
-    js = json.dumps(data, ensure_ascii=False)
+
+    with open("data.json", "w") as outfile:
+        json.dump(data, outfile)
 
     if not data:
         raise StandardError("Page source changed?")
 
     import pprint
     pp = pprint.PrettyPrinter(indent=4, width=100)
-    pp.pprint(json.loads(js))
+
+    with open("data.json", "r") as infile:
+        data = json.load(infile)
+    pp.pprint(data)
 
