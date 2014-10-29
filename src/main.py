@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import re
-import json
 from datetime import datetime
 from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
-
-#from icalendar import Calendar, Event
+from icalendar import Calendar, Event
 
 def get_html(url):
     # TODO cache
@@ -77,14 +75,27 @@ def parse(html):
             month = month_num(match.group('month'))
             start = timestamp(curr_year, month, day, match.group('start'))
             stop = timestamp(curr_year, month, day, match.group('stop'))
-            data.append(curr_year, month, day, start, stop, match.group('text'))
+            data.append(curr_year, month, int(day), start, stop, match.group('text'))
 
     return data
 
 
 def to_ical(data):
-    # TODO
-    pass
+    cal = Calendar()
+    cal.add('prodid', '-//walls-closed//antoneri.github.io//')
+    cal.add('version', '2.0')
+
+    for y, yeardata in data.items():
+        for m, monthdata in yeardata.items():
+            for d, eventdata in monthdata.items():
+                event = Event()
+                event.add('dtstamp', datetime.fromtimestamp(eventdata['start']))
+                event.add('dtstart', datetime.fromtimestamp(eventdata['start']))
+                event.add('dtend', datetime.fromtimestamp(eventdata['stop']))
+                event.add('summary', eventdata['text'])
+                cal.add_component(event)
+
+    return cal.to_ical()
 
 
 if __name__ == "__main__":
@@ -92,16 +103,8 @@ if __name__ == "__main__":
     html = get_html(URL)
     data = parse(html)
 
-    with open("data.json", "w") as outfile:
-        json.dump(data, outfile)
-
     if not data:
         raise StandardError("Page source changed?")
 
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4, width=100)
-
-    with open("data.json", "r") as infile:
-        data = json.load(infile)
-    pp.pprint(data)
-
+    with open("walls-closed.ics", "wb") as outfile:
+        outfile.write(to_ical(data))
