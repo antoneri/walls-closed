@@ -27,11 +27,11 @@ def stripped_lines(html):
     return soup.stripped_strings
 
 
-def datetime_obj(year, month, day, time):
+def timestamp(year, month, day, time):
     format_str = "{} {} {} {}".format(year, month, day, time)
     try:
-        return datetime.strptime(format_str, "%Y %m %d %H:%M")
-    except ValueError as e:
+        return datetime.strptime(format_str, "%Y %m %d %H:%M").timestamp()
+    except (ValueError, OverflowError) as e:
         raise
 
 
@@ -75,8 +75,8 @@ def parse(html):
         if match and curr_year is not None and curr_year in data:
             day = match.group('day')
             month = month_num(match.group('month'))
-            start = datetime_obj(curr_year, month, day, match.group('start')).timestamp()
-            stop = datetime_obj(curr_year, month, day, match.group('stop')).timestamp()
+            start = timestamp(curr_year, month, day, match.group('start'))
+            stop = timestamp(curr_year, month, day, match.group('stop'))
             data.append(curr_year, month, day, start, stop, match.group('text'))
 
     return data
