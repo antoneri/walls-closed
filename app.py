@@ -105,7 +105,7 @@ if __name__ == "__main__":
             with open(OUTPUT, "wb") as outfile:
                 outfile.write(to_ical(data))
         else:
-            raise Exception("Error: could not parse data.")
+            raise Exception("could not parse data")
 
     except Exception as e:
         print("Error: {}".format(e))
