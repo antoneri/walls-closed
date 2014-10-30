@@ -98,7 +98,7 @@ def get_ical(url):
 if __name__ == "__main__":
     URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
 
-    app = Flask("walls-closed")
+    app = Flask(__main__)
     cache = SimpleCache()
 
     def get_cached_ical():
