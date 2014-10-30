@@ -20,69 +20,57 @@ def stripped_lines(html):
     return soup.stripped_strings
 
 
-def timestamp(year, month, day, time):
+def dt_obj(year, month, day, time):
     date = " ".join(map(str, [year, month, day, time]))
     return datetime.strptime(date, "%Y %m %d %H:%M")
 
 
 def month_num(month):
-    months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun',
-              'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
+    months = ["jan", "feb", "mar", "apr", "maj", "jun",
+              "jul", "aug", "sep", "okt", "nov", "dec"]
     order = {val: key for key, val in enumerate(months, start=1)}
     return order[month]
-
-
-class Data(dict):
-    def append(self, year, month, day, start, stop, text):
-        entry = {day: {'start': start, 'stop': stop, 'text': text}}
-        self[year].setdefault(month, {}).update(entry)
-        return self
 
 
 def parse(html):
     year_pattern = re.compile(r"(20\d\d)")
     pattern = re.compile(r"""(?P<day>\d{1,2})
         \s*(?P<month>jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)
-        \s*(?P<start>\d{1,2}:\d\d)
-        \s*-\s*
-        (?P<stop>\d{1,2}:\d\d)
-        \s*(?P<text>.+)""", re.VERBOSE)
+        \s*(?P<start>\d{1,2}:\d\d)-(?P<end>\d{1,2}:\d\d)
+        \s*(?P<summary>.+)""", re.VERBOSE)
 
-    data = Data()
-    curr_year = None
+    data = []
+    year = None
 
     for line in stripped_lines(html):
         match = year_pattern.search(line)
-        if match and not int(match.group(0)) in data:
-            curr_year = int(match.group(0))
-            data[curr_year] = {}
+        if match:
+            year = match.group(0)
             continue
 
         match = pattern.search(line)
-        if match and curr_year is not None and curr_year in data:
-            day = match.group('day')
-            month = month_num(match.group('month'))
-            start = timestamp(curr_year, month, day, match.group('start'))
-            stop = timestamp(curr_year, month, day, match.group('stop'))
-            data.append(curr_year, month, int(day), start, stop, match.group('text'))
+        if match and year is not None:
+            (day, month, start, end, summary) = match.groups()
+            month = month_num(month)
+            start = dt_obj(year, month, day, start)
+            end = dt_obj(year, month, day, end)
+            data.append({ "start": start, "end": end, "summary": summary })
 
     return data
 
 
 def to_ical(data):
     cal = Calendar()
-    cal.add('prodid', '-//walls-closed//antoneri.github.io//')
-    cal.add('version', '2.0')
+    cal.add("prodid", "-//walls-closed//antoneri.github.io//")
+    cal.add("version", "2.0")
 
-    for y, yeardata in data.items():
-        for m, monthdata in yeardata.items():
-            for d, eventdata in monthdata.items():
-                event = Event()
-                event.add('summary', eventdata['text'])
-                event.add('dtstamp', eventdata['start'])
-                event.add('dtstart', eventdata['start'])
-                event.add('dtend', eventdata['stop'])
-                cal.add_component(event)
+    for d in data:
+        event = Event()
+        event.add("summary", d["summary"])
+        event.add("dtstamp", d["start"])
+        event.add("dtstart", d["start"])
+        event.add("dtend", d["end"])
+        cal.add_component(event)
 
     return cal.to_ical()
 
