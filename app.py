@@ -110,7 +110,6 @@ if __name__ == "__main__":
 
     @app.route("/")
     def walls_closed():
-        res = get_cached_ical()
-        return Response(response=res, mimetype="text/calendar")
+        return Response(response=get_cached_ical(), mimetype="text/calendar")
 
     app.run()
