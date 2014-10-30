@@ -77,7 +77,7 @@ def to_ical(data):
         event.add("dtend", d["end"])
         cal.add_component(event)
 
-    return cal.to_ical()
+    return cal.to_ical().decode()
 
 
 class cached(object):
@@ -104,7 +104,7 @@ def get_ical():
             raise Exception("could not parse data")
 
         print("Generating ICS...")
-        return to_ical(data).decode()
+        return to_ical(data)
 
     except Exception as e:
         print("Error: {}".format(e))
