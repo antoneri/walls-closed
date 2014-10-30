@@ -6,10 +6,11 @@ from datetime import datetime
 from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 from icalendar import Calendar, Event
+from flask import Flask, Response
+from werkzeug.contrib.cache import SimpleCache
 
 
 def get_html(url):
-    # TODO cache
     res = urlopen(URL)
     return res.read()
 
@@ -75,23 +76,41 @@ def to_ical(data):
     return cal.to_ical()
 
 
-if __name__ == "__main__":
-    URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
-    OUTPUT = "walls-closed.ics"
-
+def get_ical(url):
     try:
         print("Fetching data...")
-        html = get_html(URL)
+        html = get_html(url)
         print("Parsing html...")
         data = parse(html)
 
-        if data:
-            print("Generating ICS...")
-            with open(OUTPUT, "wb") as outfile:
-                outfile.write(to_ical(data))
-        else:
+        if not data:
             raise Exception("could not parse data")
 
-    except Exception as e:
-        sys.exit("Error: {}".format(e))
+        print("Generating ICS...")
+        return to_ical(data).decode()
 
+    except Exception as e:
+        print("Error: {}".format(e))
+
+    return None
+
+
+if __name__ == "__main__":
+    URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
+
+    app = Flask("walls-closed")
+    cache = SimpleCache()
+
+    def get_cached_ical():
+        ret = cache.get("ical")
+        if ret is None:
+            ret = get_ical(URL)
+            cache.set("ical", ret, timeout=5 * 60)
+        return ret
+
+    @app.route("/")
+    def walls_closed():
+        res = get_cached_ical()
+        return Response(response=res, mimetype="text/calendar")
+
+    app.run()
