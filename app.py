@@ -95,21 +95,19 @@ def get_ical(url):
     return None
 
 
-if __name__ == "__main__":
-    URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
 
-    app = Flask(__main__)
-    cache = SimpleCache()
+def get_cached_ical():
+    ret = cache.get("ical")
+    if ret is None:
+        ret = get_ical(URL)
+        cache.set("ical", ret, timeout=5 * 60)
+    return ret
 
-    def get_cached_ical():
-        ret = cache.get("ical")
-        if ret is None:
-            ret = get_ical(URL)
-            cache.set("ical", ret, timeout=5 * 60)
-        return ret
 
-    @app.route("/")
-    def walls_closed():
-        return Response(response=get_cached_ical(), mimetype="text/calendar")
+URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
+app = Flask(__name__)
+cache = SimpleCache()
 
-    app.run()
+@app.route("/")
+def walls_closed():
+    return Response(response=get_cached_ical(), mimetype="text/calendar")
