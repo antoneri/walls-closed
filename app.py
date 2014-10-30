@@ -42,14 +42,11 @@ class Data(dict):
 def parse(html):
     year_pattern = re.compile(r"(20\d\d)")
     pattern = re.compile(r"""(?P<day>\d{1,2})
-                         \s*
-                         (?P<month>jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)
-                         \s*
-                         (?P<start>\d{1,2}:\d\d)
-                         -
-                         (?P<stop>\d{1,2}:\d\d)
-                         \s*
-                         (?P<text>.+)""", re.VERBOSE)
+        \s*(?P<month>jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)
+        \s*(?P<start>\d{1,2}:\d\d)
+        \s*-\s*
+        (?P<stop>\d{1,2}:\d\d)
+        \s*(?P<text>.+)""", re.VERBOSE)
 
     data = Data()
     curr_year = None
