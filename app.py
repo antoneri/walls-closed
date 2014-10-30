@@ -9,6 +9,10 @@ from icalendar import Calendar, Event
 from flask import Flask, Response
 from werkzeug.contrib.cache import SimpleCache
 
+URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
+app = Flask(__name__)
+cache = SimpleCache()
+
 
 def get_html(url):
     res = urlopen(URL)
@@ -76,10 +80,23 @@ def to_ical(data):
     return cal.to_ical()
 
 
-def get_ical(url):
+class cached(object):
+    def __init__(self, fun):
+        self.fun = fun
+
+    def __call__(self):
+        ret = cache.get("ical")
+        if ret is None:
+            ret = self.fun()
+            cache.set("ical", ret, timeout=5 * 60)
+        return ret
+
+
+@cached
+def get_ical():
     try:
         print("Fetching data...")
-        html = get_html(url)
+        html = get_html(URL)
         print("Parsing html...")
         data = parse(html)
 
@@ -95,19 +112,6 @@ def get_ical(url):
     return None
 
 
-
-def get_cached_ical():
-    ret = cache.get("ical")
-    if ret is None:
-        ret = get_ical(URL)
-        cache.set("ical", ret, timeout=5 * 60)
-    return ret
-
-
-URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
-app = Flask(__name__)
-cache = SimpleCache()
-
 @app.route("/")
 def walls_closed():
-    return Response(response=get_cached_ical(), mimetype="text/calendar")
+    return Response(response=get_ical(), mimetype="text/calendar")
