@@ -113,5 +113,5 @@ def get_ical():
 
 
 @app.route("/")
-def walls_closed():
+def index():
     return Response(response=get_ical(), mimetype="text/calendar")
