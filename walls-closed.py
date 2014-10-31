@@ -49,11 +49,13 @@ def get_entries(html):
 
     for line in stripped_lines(html):
         match = year_pattern.search(line)
+
         if match:
             year = match.group(0)
             continue
 
         match = pattern.search(line)
+
         if match and year is not None:
             (day, month, start, end, summary) = match.groups()
             month = month_num(month)
@@ -85,11 +87,13 @@ class cached(object):
         self.fun = fun
 
     def __call__(self):
-        ret = cache.get("ical")
-        if ret is None:
-            ret = self.fun()
-            cache.set("ical", ret, timeout=5 * 60)
-        return ret
+        data = cache.get("ical")
+
+        if data is None:
+            data = self.fun()
+            cache.set("ical", data, timeout=5 * 60)
+
+        return data
 
 
 @cached
