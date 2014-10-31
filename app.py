@@ -15,7 +15,7 @@ cache = SimpleCache()
 
 
 def get_html(url):
-    res = urlopen(URL)
+    res = urlopen(url)
     return res.read()
 
 
@@ -37,14 +37,14 @@ def month_num(month):
     return order[month]
 
 
-def parse(html):
+def get_entries(html):
     year_pattern = re.compile(r"(20\d\d)")
     pattern = re.compile(r"""(?P<day>\d{1,2})
         \s*(?P<month>jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)
         \s*(?P<start>\d{1,2}:\d\d)-(?P<end>\d{1,2}:\d\d)
         \s*(?P<summary>.+)""", re.VERBOSE)
 
-    data = []
+    entries = []
     year = None
 
     for line in stripped_lines(html):
@@ -59,22 +59,22 @@ def parse(html):
             month = month_num(month)
             start = dt_obj(year, month, day, start)
             end = dt_obj(year, month, day, end)
-            data.append({ "start": start, "end": end, "summary": summary })
+            entries.append({ "start": start, "end": end, "summary": summary })
 
-    return data
+    return entries
 
 
-def to_ical(data):
+def to_ical(entries):
     cal = Calendar()
     cal.add("prodid", "-//walls-closed//antoneri.github.io//")
     cal.add("version", "2.0")
 
-    for d in data:
+    for entry in entries:
         event = Event()
-        event.add("summary", d["summary"])
-        event.add("dtstamp", d["start"])
-        event.add("dtstart", d["start"])
-        event.add("dtend", d["end"])
+        event.add("summary", entry["summary"])
+        event.add("dtstamp", entry["start"])
+        event.add("dtstart", entry["start"])
+        event.add("dtend", entry["end"])
         cal.add_component(event)
 
     return cal.to_ical().decode()
@@ -95,16 +95,16 @@ class cached(object):
 @cached
 def get_ical():
     try:
-        print("Fetching data...")
+        print("Fetching html...")
         html = get_html(URL)
         print("Parsing html...")
-        data = parse(html)
+        entries = get_entries(html)
 
-        if not data:
-            raise Exception("could not parse data")
+        if not entries:
+            raise Exception("could not parse html")
 
-        print("Generating ICS...")
-        return to_ical(data)
+        print("Generating iCalendar...")
+        return to_ical(entries)
 
     except Exception as e:
         print("Error: {}".format(e))
