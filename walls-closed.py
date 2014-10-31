@@ -119,3 +119,6 @@ def get_ical():
 @app.route("/")
 def index():
     return Response(response=get_ical(), mimetype="text/calendar")
+
+if __name__ == "__main__":
+    app.run()
