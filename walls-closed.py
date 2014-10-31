@@ -13,7 +13,6 @@ URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
 app = Flask(__name__)
 cache = SimpleCache()
 
-
 def get_html(url):
     res = urlopen(url)
     return res.read()
@@ -119,6 +118,7 @@ def get_ical():
 @app.route("/")
 def index():
     return Response(response=get_ical(), mimetype="text/calendar")
+
 
 if __name__ == "__main__":
     app.run()
