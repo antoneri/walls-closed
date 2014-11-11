@@ -2,6 +2,7 @@
 import re
 import sys
 import time
+from functools import partial
 from datetime import datetime
 from urllib.request import urlopen
 from bs4 import BeautifulSoup, SoupStrainer
@@ -12,11 +13,6 @@ from werkzeug.contrib.cache import SimpleCache
 URL = "http://www.iksu.se/traning/traningsutbud/klattring/"
 app = Flask(__name__)
 cache = SimpleCache()
-
-def get_html(url):
-    res = urlopen(url)
-    return res.read()
-
 
 def stripped_lines(html):
     constraint = SoupStrainer(id="post-35")
@@ -58,8 +54,7 @@ def get_entries(html):
         if match and year is not None:
             (day, month, start, end, summary) = match.groups()
             month = month_num(month)
-            start = dt_obj(year, month, day, start)
-            end = dt_obj(year, month, day, end)
+            start, end = map(partial(dt_obj, year, month, day), [start, end])
             entries.append({ "start": start, "end": end, "summary": summary })
 
     return entries
@@ -99,7 +94,7 @@ class cached(object):
 def get_ical():
     try:
         print("Fetching html...")
-        html = get_html(URL)
+        html = urlopen(URL).read()
         print("Parsing html...")
         entries = get_entries(html)
 
@@ -121,4 +116,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    print(get_ical())
